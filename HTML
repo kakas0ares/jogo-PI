@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fast Yellow - 10 Fases</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="startScreen" class="screen">
+    <h1>Fast Yellow</h1>
+    <button id="startButton">Open Game</button>
+  </div>
+
+  <div id="levelOverlay" class="overlay" style="display:none;">
+    <h2 id="overlayTitle">Próxima fase</h2>
+    <div id="overlayStars" class="overlay-stars" style="display:none;">
+      <span class="star">⭐</span>
+      <span class="star">⭐</span>
+      <span class="star">⭐</span>
+    </div>
+    <p id="overlayText">Clique em continuar para ir para a próxima fase</p>
+    <button id="continueButton">Continuar</button>
+  </div>
+
+  <div id="gameContainer" style="display:none;">
+    <h1 id="levelTitle">Fase 1</h1>
+    <div id="game">
+      <div id="player"></div>
+      <div id="goal"></div>
+    </div>
+    <div id="message">Use W, A, D para se mover.</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
