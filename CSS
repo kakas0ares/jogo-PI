@@ -1,0 +1,140 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  background: linear-gradient(135deg, #6dd5fa, #2980b9);
+  color: white;
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.screen {
+  text-align: center;
+  background: #222;
+  border-radius: 20px;
+  padding: 40px 60px;
+  box-shadow: 0 0 20px #000;
+}
+
+button {
+  background: #ffdc00;
+  border: none;
+  padding: 12px 28px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ffea0040;
+  transition: background-color 0.2s ease;
+}
+button:hover { background: #c4a300; color: white; }
+
+#gameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+#levelTitle {
+  margin: 18px;
+  font-size: 2rem;
+  text-shadow: 2px 2px #00000080;
+}
+
+#game {
+  position: relative;
+  width: 800px;
+  height: 400px;
+  background: #222;
+  border: 5px solid #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+#player {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #ffdc00;
+  border-radius: 50%;
+  border: 3px solid #c4a300;
+  box-shadow: 0 0 10px 3px #ffea0040;
+  transition: transform 0.25s ease;
+}
+
+.platform {
+  position: absolute;
+  height: 20px;
+  background: linear-gradient(90deg, #32a852, #3ae86f);
+  border-radius: 6px;
+  box-shadow: 0 3px 6px #0b3d17;
+}
+
+#goal {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, #ff5f6d, #ffc371);
+  border-radius: 50%;
+  border: 3px solid #a83232;
+  box-shadow: 0 0 12px 3px #ff5f6d99;
+}
+
+#message {
+  font-size: 1.05rem;
+  text-align: center;
+  max-width: 800px;
+  padding: 10px 20px;
+  background: #00000080;
+  border-radius: 10px;
+}
+
+.overlay {
+  position: absolute;
+  z-index: 999;
+  width: 460px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #111c;
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 10px 40px #000;
+  backdrop-filter: blur(4px);
+}
+
+.overlay h2 {
+  margin: 8px 0 12px 0;
+  font-size: 1.8rem;
+  text-shadow: 2px 2px #00000080;
+}
+
+.overlay-stars {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 10px 0;
+  font-size: 2rem;
+}
+
+.overlay p {
+  margin: 8px 0 14px 0;
+  color: #eee;
+}
+
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffea00;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 6px #ffea0040;
+}
