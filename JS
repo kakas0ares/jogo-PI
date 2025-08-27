@@ -1,0 +1,220 @@
+const startScreen = document.getElementById('startScreen');
+const startButton = document.getElementById('startButton');
+const gameContainer = document.getElementById('gameContainer');
+const player = document.getElementById('player');
+const game = document.getElementById('game');
+const goal = document.getElementById('goal');
+const message = document.getElementById('message');
+const levelTitle = document.getElementById('levelTitle');
+
+const levelOverlay = document.getElementById('levelOverlay');
+const overlayStars = document.getElementById('overlayStars');
+const overlayText = document.getElementById('overlayText');
+const continueButton = document.getElementById('continueButton');
+const overlayTitle = document.getElementById('overlayTitle');
+
+let gravity = 0.6;
+let gravityDirection = 1;
+let velocityY = 0;
+let velocityX = 0;
+let keys = {};
+let currentLevel = 0;
+let platforms = [];
+let playerState = { x: 50, y: 0, width: 40, height: 40 };
+
+let gamePaused = false;
+let goalReached = false;
+
+const levels = [
+  { platforms: [{ x: 0, y: 380, width: 800 }], goal: { x: 750, y: 340 } },
+  { platforms: [{ x: 0, y: 380, width: 600 }, { x: 650, y: 320, width: 120 }], goal: { x: 700, y: 280 } },
+  { platforms: [{ x: 0, y: 380, width: 200 }, { x: 300, y: 340, width: 140 }, { x: 550, y: 300, width: 180 }], goal: { x: 730, y: 260 } },
+  { platforms: [{ x: 0, y: 380, width: 150 }, { x: 220, y: 340, width: 120 }, { x: 420, y: 300, width: 140 }, { x: 640, y: 260, width: 90 }], goal: { x: 700, y: 220 } },
+  { platforms: [{ x: 0, y: 380, width: 100 }, { x: 150, y: 330, width: 100 }, { x: 350, y: 290, width: 110 }, { x: 550, y: 250, width: 120 }, { x: 720, y: 210, width: 60 }], goal: { x: 760, y: 170 } },
+  { platforms: [{ x: 0, y: 350, width: 200 }, { x: 260, y: 310, width: 110 }, { x: 420, y: 270, width: 90 }, { x: 580, y: 230, width: 120 }], goal: { x: 700, y: 190 } },
+  { platforms: [{ x: 0, y: 380, width: 300 }, { x: 340, y: 340, width: 90 }, { x: 480, y: 300, width: 120 }, { x: 660, y: 260, width: 80 }], goal: { x: 730, y: 220 } },
+  { platforms: [{ x: 0, y: 380, width: 200 }, { x: 280, y: 320, width: 90 }, { x: 420, y: 280, width: 110 }, { x: 600, y: 240, width: 90 }], goal: { x: 700, y: 200 } },
+  { platforms: [{ x: 0, y: 380, width: 150 }, { x: 200, y: 340, width: 120 }, { x: 400, y: 300, width: 100 }, { x: 560, y: 260, width: 100 }, { x: 720, y: 220, width: 60 }], goal: { x: 750, y: 180 } },
+  { platforms: [{ x: 0, y: 380, width: 100 }, { x: 140, y: 330, width: 100 }, { x: 320, y: 290, width: 100 }, { x: 500, y: 250, width: 90 }, { x: 680, y: 210, width: 60 }, { x: 760, y: 170, width: 40 }], goal: { x: 770, y: 140 } }
+];
+
+function createPlatforms() {
+  document.querySelectorAll('.platform').forEach(p => p.remove());
+  platforms = [];
+  levels[currentLevel].platforms.forEach(data => {
+    const p = document.createElement('div');
+    p.classList.add('platform');
+    p.style.left = data.x + 'px';
+    p.style.top = data.y + 'px';
+    p.style.width = data.width + 'px';
+    game.appendChild(p);
+    platforms.push({ x: data.x, y: data.y, width: data.width, height: 20 });
+  });
+}
+
+function setGoal() {
+  const g = levels[currentLevel].goal;
+  goal.style.left = g.x + 'px';
+  goal.style.top = g.y + 'px';
+}
+
+function resetPlayer() {
+  playerState.x = 50;
+  const firstPlatform = platforms[0];
+  playerState.y = firstPlatform ? firstPlatform.y - playerState.height : 340;
+  velocityY = 0;
+  velocityX = 0;
+  goalReached = false;
+  player.style.display = 'block';
+  player.style.transform = 'rotate(0deg)';
+}
+
+function explodePlayer() {
+  player.style.display = 'none';
+  for (let i = 0; i < 12; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.left = (playerState.x + playerState.width / 2) + 'px';
+    particle.style.top = (playerState.y + playerState.height / 2) + 'px';
+    game.appendChild(particle);
+
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 4 + 2;
+    let vx = Math.cos(angle) * speed;
+    let vy = Math.sin(angle) * speed;
+    let life = 30 + Math.round(Math.random() * 20);
+
+    (function move() {
+      particle.style.left = (parseFloat(particle.style.left) + vx) + 'px';
+      particle.style.top = (parseFloat(particle.style.top) + vy) + 'px';
+      vy += 0.12 * -1;
+      life--;
+      if (life > 0) requestAnimationFrame(move);
+      else particle.remove();
+    })();
+  }
+
+  setTimeout(() => {
+    resetPlayer();
+  }, 700);
+}
+
+function showLevelOverlay() {
+  gamePaused = true;
+  levelOverlay.style.display = 'block';
+  overlayTitle.innerText = currentLevel === 0 ? 'Open Game' : 'Próxima fase';
+  if (currentLevel >= 0) overlayStars.style.display = 'flex';
+  else overlayStars.style.display = 'none';
+  overlayText.innerText = `Você concluiu a Fase ${currentLevel + 1}. Clique em continuar.`;
+}
+
+function continueToNext() {
+  levelOverlay.style.display = 'none';
+  currentLevel++;
+  if (currentLevel >= levels.length) {
+    gamePaused = true;
+    message.innerText = '🏁 Parabéns! Você concluiu todas as fases!';
+    levelTitle.innerText = 'Concluído';
+    return;
+  }
+  levelTitle.innerText = `Fase ${currentLevel + 1}`;
+  createPlatforms();
+  setGoal();
+  resetPlayer();
+  gamePaused = false;
+  requestAnimationFrame(gameLoop);
+}
+
+function onGround() {
+  return platforms.some(p => {
+    return (
+      playerState.x + playerState.width > p.x &&
+      playerState.x < p.x + p.width &&
+      Math.abs(playerState.y + playerState.height - p.y) < 6
+    );
+  });
+}
+
+function gameLoop() {
+  if (gamePaused) {
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  if (keys['a'] || keys['A']) velocityX = -3;
+  else if (keys['d'] || keys['D']) velocityX = 3;
+  else velocityX = 0;
+
+  if (keys['w'] || keys['W']) {
+    velocityY = -5;
+  } else if (!onGround()) {
+    velocityY += gravity;
+  } else {
+    velocityY = 0;
+  }
+
+  playerState.x += velocityX;
+  playerState.y += velocityY;
+
+  let onPlatform = false;
+  platforms.forEach(p => {
+    if (playerState.x < p.x + p.width && playerState.x + playerState.width > p.x) {
+      if (playerState.y + playerState.height >= p.y && playerState.y + playerState.height <= p.y + velocityY + 8) {
+        playerState.y = p.y - playerState.height;
+        velocityY = 0;
+        onPlatform = true;
+      }
+    }
+  });
+
+  if (!onPlatform && (playerState.y > game.clientHeight || playerState.y < -60)) {
+    explodePlayer();
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  if (playerState.x < 0) playerState.x = 0;
+  if (playerState.x + playerState.width > game.clientWidth) playerState.x = game.clientWidth - playerState.width;
+
+  const g = levels[currentLevel].goal;
+  if (!goalReached &&
+      playerState.x + playerState.width > g.x &&
+      playerState.x < g.x + 40 &&
+      playerState.y + playerState.height > g.y &&
+      playerState.y < g.y + 40) {
+    goalReached = true;
+    showLevelOverlay();
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  player.style.left = playerState.x + 'px';
+  player.style.top = playerState.y + 'px';
+
+  requestAnimationFrame(gameLoop);
+}
+
+window.addEventListener('keydown', e => {
+  keys[e.key] = true;
+});
+
+window.addEventListener('keyup', e => {
+  keys[e.key] = false;
+});
+
+startButton.addEventListener('click', () => {
+  startScreen.style.display = 'none';
+  gameContainer.style.display = 'flex';
+  currentLevel = 0;
+  levelTitle.innerText = 'Fase 1';
+  createPlatforms();
+  setGoal();
+  resetPlayer();
+  message.innerText = 'Use W, A, D para se mover.';
+  gamePaused = false;
+  requestAnimationFrame(gameLoop);
+});
+
+continueButton.addEventListener('click', () => {
+  continueToNext();
+});
